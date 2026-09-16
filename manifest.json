@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "My Website Blocker",
+  "version": "1.0",
+  "description": "Personal website blocker. Add domains in the popup to block them.",
+  "permissions": ["declarativeNetRequest", "storage"],
+  "host_permissions": ["<all_urls>"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Website Blocker"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["blocked.html"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

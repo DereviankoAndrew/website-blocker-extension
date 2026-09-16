@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      width: 300px;
+      margin: 0;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #fff;
+      color: #1a1a1a;
+    }
+    h1 {
+      font-size: 15px;
+      margin: 0 0 12px;
+    }
+    .add-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    #domain-input {
+      flex: 1;
+      padding: 7px 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+    }
+    #domain-input:focus {
+      border-color: #4a7dfc;
+    }
+    #add-btn {
+      padding: 7px 14px;
+      border: none;
+      border-radius: 6px;
+      background: #1a1a1a;
+      color: #fff;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    #add-btn:hover {
+      background: #333;
+    }
+    #error {
+      color: #c0392b;
+      font-size: 12px;
+      margin: -6px 0 8px;
+      display: none;
+    }
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+    li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 0;
+      border-bottom: 1px solid #eee;
+      font-size: 13px;
+    }
+    li:last-child {
+      border-bottom: none;
+    }
+    .remove-btn {
+      border: none;
+      background: none;
+      color: #999;
+      cursor: pointer;
+      font-size: 15px;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .remove-btn:hover {
+      color: #c0392b;
+      background: #fbecea;
+    }
+    #empty {
+      color: #999;
+      font-size: 13px;
+      text-align: center;
+      padding: 12px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Blocked websites</h1>
+  <div class="add-row">
+    <input id="domain-input" type="text" placeholder="e.g. youtube.com" autofocus>
+    <button id="add-btn">Block</button>
+  </div>
+  <div id="error"></div>
+  <ul id="site-list"></ul>
+  <div id="empty">No blocked sites yet.</div>
+  <script src="popup.js"></script>
+</body>
+</html>
