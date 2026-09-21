@@ -59,13 +59,59 @@
     li {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      gap: 8px;
       padding: 7px 0;
       border-bottom: 1px solid #eee;
       font-size: 13px;
     }
     li:last-child {
       border-bottom: none;
+    }
+    .domain {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    li.disabled .domain {
+      color: #aaa;
+      text-decoration: line-through;
+    }
+    .toggle {
+      position: relative;
+      width: 32px;
+      height: 18px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      inset: 0;
+      background: #ccc;
+      border-radius: 9px;
+      transition: background 0.15s;
+    }
+    .slider::before {
+      content: "";
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      left: 2px;
+      top: 2px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.15s;
+    }
+    .toggle input:checked + .slider {
+      background: #e74c3c;
+    }
+    .toggle input:checked + .slider::before {
+      transform: translateX(14px);
     }
     .remove-btn {
       border: none;

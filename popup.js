@@ -15,29 +15,35 @@ function normalizeDomain(raw) {
   return d;
 }
 
+// Each entry is { domain, enabled }. Older versions stored plain strings,
+// so migrate those on read.
 async function getBlockedSites() {
   const { blockedSites = [] } = await chrome.storage.local.get("blockedSites");
-  return blockedSites;
+  return blockedSites.map((s) =>
+    typeof s === "string" ? { domain: s, enabled: true } : s
+  );
 }
 
-// Rebuild all dynamic rules from the stored list. Each domain gets a rule
-// that redirects its main-frame requests (including subdomains) to blocked.html.
+// Rebuild all dynamic rules from the stored list. Each enabled domain gets a
+// rule that redirects its main-frame requests (incl. subdomains) to blocked.html.
 async function syncRules(sites) {
   const existing = await chrome.declarativeNetRequest.getDynamicRules();
   await chrome.declarativeNetRequest.updateDynamicRules({
     removeRuleIds: existing.map((r) => r.id),
-    addRules: sites.map((domain, i) => ({
-      id: i + 1,
-      priority: 1,
-      action: {
-        type: "redirect",
-        redirect: { extensionPath: "/blocked.html" },
-      },
-      condition: {
-        urlFilter: `||${domain}^`,
-        resourceTypes: ["main_frame"],
-      },
-    })),
+    addRules: sites
+      .filter((s) => s.enabled)
+      .map((s, i) => ({
+        id: i + 1,
+        priority: 1,
+        action: {
+          type: "redirect",
+          redirect: { extensionPath: "/blocked.html" },
+        },
+        condition: {
+          urlFilter: `||${s.domain}^`,
+          resourceTypes: ["main_frame"],
+        },
+      })),
   });
 }
 
@@ -50,19 +56,44 @@ async function saveSites(sites) {
 function render(sites) {
   list.innerHTML = "";
   empty.style.display = sites.length ? "none" : "block";
-  for (const domain of sites) {
+  for (const site of sites) {
     const li = document.createElement("li");
+    if (!site.enabled) li.classList.add("disabled");
+
     const span = document.createElement("span");
-    span.textContent = domain;
+    span.className = "domain";
+    span.textContent = site.domain;
+
+    const toggle = document.createElement("label");
+    toggle.className = "toggle";
+    toggle.title = site.enabled
+      ? `Pause blocking ${site.domain}`
+      : `Resume blocking ${site.domain}`;
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = site.enabled;
+    checkbox.addEventListener("change", async () => {
+      const current = await getBlockedSites();
+      await saveSites(
+        current.map((s) =>
+          s.domain === site.domain ? { ...s, enabled: checkbox.checked } : s
+        )
+      );
+    });
+    const slider = document.createElement("span");
+    slider.className = "slider";
+    toggle.append(checkbox, slider);
+
     const btn = document.createElement("button");
     btn.className = "remove-btn";
     btn.textContent = "✕";
-    btn.title = `Unblock ${domain}`;
+    btn.title = `Remove ${site.domain}`;
     btn.addEventListener("click", async () => {
       const current = await getBlockedSites();
-      await saveSites(current.filter((s) => s !== domain));
+      await saveSites(current.filter((s) => s.domain !== site.domain));
     });
-    li.append(span, btn);
+
+    li.append(span, toggle, btn);
     list.appendChild(li);
   }
 }
@@ -80,12 +111,12 @@ async function addSite() {
     return;
   }
   const sites = await getBlockedSites();
-  if (sites.includes(domain)) {
-    showError("That site is already blocked.");
+  if (sites.some((s) => s.domain === domain)) {
+    showError("That site is already in the list.");
     return;
   }
-  sites.push(domain);
-  sites.sort();
+  sites.push({ domain, enabled: true });
+  sites.sort((a, b) => a.domain.localeCompare(b.domain));
   await saveSites(sites);
   input.value = "";
   input.focus();
@@ -96,4 +127,8 @@ input.addEventListener("keydown", (e) => {
   if (e.key === "Enter") addSite();
 });
 
-getBlockedSites().then(render);
+// Render, and re-sync rules once in case the stored format was just migrated.
+getBlockedSites().then(async (sites) => {
+  render(sites);
+  await syncRules(sites);
+});

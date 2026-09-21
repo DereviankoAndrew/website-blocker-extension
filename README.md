@@ -13,7 +13,8 @@ A tiny personal Chrome extension for blocking websites. Not published — loaded
 
 - Click the extension icon, type a domain (e.g. `youtube.com`), and press **Block**.
 - The domain and all its subdomains are blocked; visiting them shows a "This site is blocked" page.
-- Click ✕ next to a domain in the popup to unblock it.
+- Use the toggle next to a domain to pause/resume blocking it without removing it from the list.
+- Click ✕ next to a domain to remove it entirely.
 
 Pasting a full URL like `https://www.twitter.com/home` also works — it gets normalized to `twitter.com`.
 
